@@ -107,6 +107,23 @@ struct LoginView: View {
 }
 ```
 
+## UIKit 调用
+
+UIKit 页面可以直接从当前 `UIViewController` 弹出验证码：
+
+```swift
+import AJCaptcha
+
+presentCaptchaPopup(
+    configuration: configuration
+) { result in
+    // 将 result.captchaVerification 原样传给业务服务端
+    login(captchaVerification: result.captchaVerification)
+}
+```
+
+内部通过透明 `UIHostingController` 承载 SwiftUI 弹窗，展示方式为 `overFullScreen`，并保持无动画的全屏半透明背景。
+
 ## CocoaPods 接入
 
 ```ruby
