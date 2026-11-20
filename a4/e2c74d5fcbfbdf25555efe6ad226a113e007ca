@@ -1,0 +1,23 @@
+README.md
+  s_97d0624c060d6c::t_cbb52eff0a2535 159,196
+Sources/Models/CaptchaConfiguration.swift
+  s_97d0624c060d6c::t_cbb52eff0a2535 18-20,49,59,69
+Sources/Views/CaptchaViewModel.swift
+  s_97d0624c060d6c::t_cbb52eff0a2535 29-31,44,89,153
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "a4e2c74d5fcbfbdf25555efe6ad226a113e007ca",
+  "prompts": {},
+  "sessions": {
+    "s_97d0624c060d6c": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1f6e9-f0c5-70c2-bc65-d55c9f461200",
+        "model": "glm-5.3-flash"
+      },
+      "human_author": "残无殇 <zhanbaocheng@vip.qq.com>"
+    }
+  }
+}
