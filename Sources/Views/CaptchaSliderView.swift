@@ -24,7 +24,11 @@ struct CaptchaSliderView: View {
     private let accidentalTouchThreshold: Double
 
     /// 提交滑动校验的回调。
-    private let onCheck: (_ displayedOffset: Double, _ displayedImageWidth: Double) -> Void
+    private let onCheck: (
+        _ displayedOffset: Double,
+        _ displayedSliderMaxOffset: Double,
+        _ displayedImageWidth: Double
+    ) -> Void
 
     /// 刷新验证码的回调。
     private let onRefresh: () -> Void
@@ -44,7 +48,7 @@ struct CaptchaSliderView: View {
     ///   - sliderPrompt: 滑动条提示文案。
     ///   - localization: 组件国际化配置。
     ///   - accidentalTouchThreshold: 误触阈值比例，范围 0...1。
-    ///   - onCheck: 松手后的提交回调，参数依次为屏幕偏移和背景图显示宽度。
+    ///   - onCheck: 松手后的提交回调，参数依次为滑块屏幕偏移、滑块最大屏幕偏移与背景图显示宽度。
     ///   - onRefresh: 点击刷新后的回调。
     init(
         backgroundImage: UIImage,
@@ -53,7 +57,11 @@ struct CaptchaSliderView: View {
         sliderPrompt: String,
         localization: CaptchaLocalization,
         accidentalTouchThreshold: Double,
-        onCheck: @escaping (_ displayedOffset: Double, _ displayedImageWidth: Double) -> Void,
+        onCheck: @escaping (
+            _ displayedOffset: Double,
+            _ displayedSliderMaxOffset: Double,
+            _ displayedImageWidth: Double
+        ) -> Void,
         onRefresh: @escaping () -> Void
     ) {
         self.backgroundImage = backgroundImage
@@ -75,17 +83,20 @@ struct CaptchaSliderView: View {
                 : imageWidth * 155 / 310
             let sliderHeight: CGFloat = 40
             let thumbSize: CGFloat = 40
+            let sliderMaxOffset = imageWidth - thumbSize
 
             VStack(alignment: .center, spacing: 15) {
                 imageView(
                     imageWidth: imageWidth,
-                    imageHeight: imageHeight
+                    imageHeight: imageHeight,
+                    sliderMaxOffset: sliderMaxOffset
                 )
 
                 sliderView(
                     imageWidth: imageWidth,
                     sliderHeight: sliderHeight,
-                    thumbSize: thumbSize
+                    thumbSize: thumbSize,
+                    sliderMaxOffset: sliderMaxOffset
                 )
             }
             .frame(width: proxy.size.width, height: imageHeight + 15 + sliderHeight)
@@ -104,11 +115,18 @@ struct CaptchaSliderView: View {
     /// - Parameters:
     ///   - imageWidth: 背景图显示宽度。
     ///   - imageHeight: 背景图显示高度。
+    ///   - sliderMaxOffset: 滑块在轨道上的最大显示偏移。
     private func imageView(
         imageWidth: CGFloat,
-        imageHeight: CGFloat
+        imageHeight: CGFloat,
+        sliderMaxOffset: CGFloat
     ) -> some View {
-        ZStack(alignment: .topLeading) {
+        let jigsawMaxOffset = imageWidth - jigsawDisplayWidth(
+            imageWidth: imageWidth,
+            imageHeight: imageHeight
+        )
+
+        return ZStack(alignment: .topLeading) {
             Image(uiImage: backgroundImage)
                 .resizable()
                 .frame(width: imageWidth, height: imageHeight)
@@ -119,7 +137,14 @@ struct CaptchaSliderView: View {
                     width: jigsawDisplayWidth(imageWidth: imageWidth, imageHeight: imageHeight),
                     height: imageHeight
                 )
-                .offset(x: offset)
+                // Android 版本先换算为滑块比例，再按拼图最大位移移动拼图。
+                .offset(
+                    x: jigsawOffset(
+                        displayedOffset: offset,
+                        sliderMaxOffset: sliderMaxOffset,
+                        jigsawMaxOffset: jigsawMaxOffset
+                    )
+                )
 
             VStack {
                 HStack {
@@ -167,12 +192,13 @@ struct CaptchaSliderView: View {
     ///   - imageWidth: 滑动条宽度，与背景图一致。
     ///   - sliderHeight: 滑动条高度。
     ///   - thumbSize: 可拖动按钮尺寸。
+    ///   - sliderMaxOffset: 滑块最大可滑动偏移。
     private func sliderView(
         imageWidth: CGFloat,
         sliderHeight: CGFloat,
-        thumbSize: CGFloat
+        thumbSize: CGFloat,
+        sliderMaxOffset: CGFloat
     ) -> some View {
-        let maximumOffset = imageWidth - thumbSize
         let isEnabled = phase == .ready
         let thumbColor = phase == .success
             ? Color(red: 0.31, green: 0.68, blue: 0.31)
@@ -209,12 +235,12 @@ struct CaptchaSliderView: View {
                     .onChanged { value in
                         guard isEnabled else { return }
                         let next = dragStartOffset + value.translation.width
-                        offset = min(max(0, next), maximumOffset)
+                        offset = min(max(0, next), sliderMaxOffset)
                     }
                     .onEnded { _ in
                         guard isEnabled else { return }
 
-                        let thresholdOffset = maximumOffset * CGFloat(accidentalTouchThreshold)
+                        let thresholdOffset = sliderMaxOffset * CGFloat(accidentalTouchThreshold)
                         if offset < thresholdOffset {
                             CaptchaLogger.info(
                                 "check ignored by accidental threshold offset=\(offset) threshold=\(thresholdOffset)"
@@ -225,7 +251,7 @@ struct CaptchaSliderView: View {
                             return
                         }
 
-                        onCheck(offset, imageWidth)
+                        onCheck(offset, sliderMaxOffset, imageWidth)
                     }
             )
         }
@@ -285,5 +311,22 @@ struct CaptchaSliderView: View {
     ) -> CGFloat {
         guard jigsawImage.size.height > 0 else { return imageWidth * 47 / 310 }
         return jigsawImage.size.width * imageHeight / jigsawImage.size.height
+    }
+
+    /// 将滑块显示偏移换算成拼图显示偏移。
+    ///
+    /// - Parameters:
+    ///   - displayedOffset: 滑块当前显示偏移。
+    ///   - sliderMaxOffset: 滑块最大显示偏移。
+    ///   - jigsawMaxOffset: 拼图最大显示偏移。
+    /// - Returns: 与 Android 版本一致的拼图显示偏移。
+    private func jigsawOffset(
+        displayedOffset: CGFloat,
+        sliderMaxOffset: CGFloat,
+        jigsawMaxOffset: CGFloat
+    ) -> CGFloat {
+        guard sliderMaxOffset > 0, jigsawMaxOffset > 0 else { return 0 }
+        let fraction = min(max(displayedOffset, 0) / sliderMaxOffset, 1)
+        return fraction * jigsawMaxOffset
     }
 }

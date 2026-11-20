@@ -126,10 +126,12 @@ final class CaptchaViewModel: ObservableObject {
     ///
     /// - Parameters:
     ///   - displayedOffset: 当前屏幕显示宽度下的滑块偏移。
+    ///   - displayedSliderMaxOffset: 滑块在当前屏幕下的最大可滑动偏移。
     ///   - displayedImageWidth: 背景图当前显示宽度。
     ///   - onSuccess: check 成功后的唯一回调，参数中包含业务服务端需要的二次验证串。
     func check(
         displayedOffset: Double,
+        displayedSliderMaxOffset: Double,
         displayedImageWidth: Double,
         onSuccess: @escaping (CaptchaResult) -> Void
     ) {
@@ -144,6 +146,7 @@ final class CaptchaViewModel: ObservableObject {
             do {
                 let payload = try makeCheckPayload(
                     displayedOffset: displayedOffset,
+                    displayedSliderMaxOffset: displayedSliderMaxOffset,
                     displayedImageWidth: displayedImageWidth
                 )
                 let response = try await service.check(
@@ -187,21 +190,33 @@ final class CaptchaViewModel: ObservableObject {
     ///
     /// - Parameters:
     ///   - displayedOffset: 当前屏幕显示宽度下的滑块偏移。
+    ///   - displayedSliderMaxOffset: 滑块在当前屏幕下的最大可滑动偏移。
     ///   - displayedImageWidth: 背景图当前显示宽度。
     /// - Returns: 加密或明文坐标 JSON 与业务服务端需要的二次验证参数。
     /// - Throws: JSON 序列化或 AES 加密失败时抛出错误。
     private func makeCheckPayload(
         displayedOffset: Double,
+        displayedSliderMaxOffset: Double,
         displayedImageWidth: Double
     ) throws -> (
         encryptedPointJSON: String,
         captchaVerification: String
     ) {
-        // HTML 示例使用 620 作为滑动坐标换算基准，不能按底图原始宽度直接换算。
-        let scale = displayedImageWidth > 0 ? 620 / displayedImageWidth : 1
-        let point = CaptchaPoint(x: displayedOffset * scale)
+        guard let backgroundImage = backgroundImage,
+              let jigsawImage = jigsawImage else {
+            throw CaptchaClientError.invalidResponse
+        }
+
+        // Android 版本按滑块比例换算，提交原图坐标系下的可用横向位移。
+        guard displayedSliderMaxOffset > 0,
+              backgroundImage.size.width > jigsawImage.size.width else {
+            throw CaptchaClientError.invalidResponse
+        }
+        let fraction = displayedOffset / displayedSliderMaxOffset
+        let originalImageAvailableWidth = backgroundImage.size.width - jigsawImage.size.width
+        let point = CaptchaPoint(x: fraction * originalImageAvailableWidth)
         CaptchaLogger.info(
-            "check request prepare displayedOffset=\(displayedOffset) displayedWidth=\(displayedImageWidth) scaledX=\(point.x) encrypted=\(!secretKey.isEmpty)"
+            "check request prepare displayedOffset=\(displayedOffset) sliderMaxOffset=\(displayedSliderMaxOffset) displayedWidth=\(displayedImageWidth) originalWidth=\(backgroundImage.size.width) jigsawWidth=\(jigsawImage.size.width) scaledX=\(point.x) encrypted=\(!secretKey.isEmpty)"
         )
 
         let encoder = JSONEncoder()
