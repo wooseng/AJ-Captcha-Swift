@@ -1,0 +1,23 @@
+Sources/Views/CaptchaPopupView.swift
+  s_de5f3ca74a68fe::t_c36c1fb3b19a51 97,100
+Sources/Views/CaptchaSliderView.swift
+  s_de5f3ca74a68fe::t_01a0a4d6fa8101 27-31,51,60-64,86,91-92,98-99,118,121-122,124-129,140-147,195,199-200,238,243,254,315-331
+Sources/Views/CaptchaViewModel.swift
+  s_de5f3ca74a68fe::t_cb739a866dc60a 129,134,149,193,199,205-217,219
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "ac521a7816ae55a1ea198304a78758f520369a3b",
+  "prompts": {},
+  "sessions": {
+    "s_de5f3ca74a68fe": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1f84f-49bd-7e62-a9a3-06173bde9147",
+        "model": "glm-5.3-flash"
+      },
+      "human_author": "残无殇 <zhanbaocheng@vip.qq.com>"
+    }
+  }
+}
