@@ -1,0 +1,37 @@
+README.md
+  s_97d0624c060d6c::t_fd92129af5ca64 16-17,112-164,194-195
+  s_97d0624c060d6c::t_f3fc3f336240a1 196-197
+  s_97d0624c060d6c::t_f4775130736303 213,217
+Sources/CaptchaClient.swift
+  s_97d0624c060d6c::t_f3fc3f336240a1 42,72,81
+  s_97d0624c060d6c::t_9684fe6ab81e1f 5-7,31-33,36-40,48,51-52,55-56,58-59,62,64-65,75,149,156,186-188
+  s_97d0624c060d6c::t_419fc2de0e9016 189
+Sources/CaptchaConfiguration.swift
+  s_97d0624c060d6c::t_d425c70fe2c24a 18-21,45-47,55,64
+  s_97d0624c060d6c::t_f3fc3f336240a1 11-12,22-26,48,56-57,65-66
+Sources/CaptchaCheckResponse.swift
+  s_97d0624c060d6c::t_d425c70fe2c24a 1-27
+Sources/CaptchaViewModel.swift
+  s_97d0624c060d6c::t_9684fe6ab81e1f 26-27,37,40,74-76,83-86,141,143-148,151-159,171,182-217
+  s_97d0624c060d6c::t_8f52c46b58e9c4 218-219
+Sources/CaptchaService.swift
+  s_97d0624c060d6c::t_d425c70fe2c24a 1-37
+Sources/CaptchaData.swift
+  s_97d0624c060d6c::t_d425c70fe2c24a 4-6,9,12,15,17-37
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "c663fa29f105aa638f9ee3090c94688160325216",
+  "prompts": {},
+  "sessions": {
+    "s_97d0624c060d6c": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1f6e9-f0c5-70c2-bc65-d55c9f461200",
+        "model": "glm-5.3-flash"
+      },
+      "human_author": "残无殇 <zhanbaocheng@vip.qq.com>"
+    }
+  }
+}
