@@ -8,11 +8,21 @@ import Foundation
 ///     serverURL: URL(string: "https://example.com/captcha-api")!
 /// )
 /// ```
-/// `serverURL` 只填写服务根地址，组件会自动拼接 `/captcha/get` 与 `/captcha/check`。
+/// `serverURL` 只填写服务根地址；获取与校验接口地址可通过配置覆盖，默认分别为
+/// `/captcha/get` 与 `/captcha/check`。
 public struct CaptchaConfiguration {
 
     /// AJ-Captcha 服务根地址，例如 `https://example.com/captcha-api`。
     public let serverURL: URL
+
+    /// 外部自定义请求实现；为 nil 时使用内置 URLSession 实现。
+    public let service: CaptchaService?
+
+    /// 获取验证码图片接口地址；内置请求实现会拼接在 `serverURL` 后，默认 `/captcha/get`。
+    public let getCaptchaEndpoint: String
+
+    /// 校验验证码接口地址；会拼接在 `serverURL` 后，默认 `/captcha/check`。
+    public let checkCaptchaEndpoint: String
 
     /// 验证码类型；当前 Swift 组件实现滑动拼图。
     public let captchaType: CaptchaType
@@ -32,19 +42,28 @@ public struct CaptchaConfiguration {
     /// 创建组件配置。
     ///
     /// - Parameters:
-    ///   - serverURL: AJ-Captcha 服务根地址；组件会在该地址后拼接 `/captcha/get` 与 `/captcha/check`。
+    ///   - serverURL: AJ-Captcha 服务根地址；使用内置请求实现时生效。
+    ///   - service: 外部自定义请求实现；默认 nil 表示使用内置 URLSession 实现。
+    ///   - getCaptchaEndpoint: 获取验证码图片接口地址，默认 `/captcha/get`；使用内置请求实现时生效。
+    ///   - checkCaptchaEndpoint: 校验验证码接口地址，默认 `/captcha/check`。
     ///   - captchaType: 验证码类型，默认滑动拼图 `.blockPuzzle`。
     ///   - accidentalTouchThreshold: 误触阈值比例，范围会被收敛到 0...1，默认 0.05。
     ///   - sliderPrompt: 滑动条提示覆盖文案；优先级高于国际化配置，传 nil 表示使用国际化文案。
     ///   - localization: 组件国际化文案配置；默认先读取宿主 `Localizable.strings`，缺失项回退简体中文。
     public init(
         serverURL: URL,
+        service: CaptchaService? = nil,
+        getCaptchaEndpoint: String = "/captcha/get",
+        checkCaptchaEndpoint: String = "/captcha/check",
         captchaType: CaptchaType = .blockPuzzle,
         accidentalTouchThreshold: Double = 0.05,
         sliderPrompt: String? = nil,
         localization: CaptchaLocalization = CaptchaLocalization()
     ) {
         self.serverURL = serverURL
+        self.service = service
+        self.getCaptchaEndpoint = getCaptchaEndpoint
+        self.checkCaptchaEndpoint = checkCaptchaEndpoint
         self.captchaType = captchaType
         self.accidentalTouchThreshold = min(max(accidentalTouchThreshold, 0), 1)
         self.sliderPrompt = sliderPrompt

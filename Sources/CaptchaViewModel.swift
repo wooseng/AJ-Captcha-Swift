@@ -23,8 +23,8 @@ final class CaptchaViewModel: ObservableObject {
     /// 服务端返回的 AES 密钥。
     private var secretKey: String = ""
 
-    /// 网络客户端。
-    private let client: CaptchaClient
+    /// 验证码请求实现；优先使用外部注入实现，否则使用内置 URLSession 客户端。
+    private let service: CaptchaService
 
     /// 组件配置。
     private let configuration: CaptchaConfiguration
@@ -34,10 +34,10 @@ final class CaptchaViewModel: ObservableObject {
 
     /// 创建验证码状态机。
     ///
-    /// - Parameter configuration: 组件配置，包含服务地址与滑块提示文案。
+    /// - Parameter configuration: 组件配置，包含服务地址、请求实现与滑块提示文案。
     init(configuration: CaptchaConfiguration) {
         self.configuration = configuration
-        self.client = CaptchaClient(configuration: configuration)
+        self.service = configuration.service ?? CaptchaClient(configuration: configuration)
     }
 
     /// 滑动提示文案；外部覆盖文案优先，其次读取国际化配置。
@@ -71,14 +71,19 @@ final class CaptchaViewModel: ObservableObject {
             CaptchaLogger.info("load ignored because phase is loading")
             return
         }
-        CaptchaLogger.info("load start server=\(configuration.serverURL.absoluteString)")
+        CaptchaLogger.info(
+            "load start service=\(configuration.service == nil ? "builtin" : "external") server=\(configuration.serverURL.absoluteString)"
+        )
         phase = .loading
         token = ""
         secretKey = ""
 
         Task {
             do {
-                let data = try await client.getCaptcha(clientUid: CaptchaClientIdentifier.shared.value)
+                let data = try await service.getCaptcha(
+                    captchaType: configuration.captchaType,
+                    clientUid: CaptchaClientIdentifier.shared.value
+                )
                 guard phase == .loading else {
                     CaptchaLogger.info("load result ignored because phase changed")
                     return
@@ -133,13 +138,25 @@ final class CaptchaViewModel: ObservableObject {
 
         Task {
             do {
-                let verification = try await client.check(
-                    token: token,
-                    secretKey: secretKey,
+                let payload = try makeCheckPayload(
                     displayedOffset: displayedOffset,
-                    displayedImageWidth: displayedImageWidth,
+                    displayedImageWidth: displayedImageWidth
+                )
+                let response = try await service.check(
+                    captchaType: configuration.captchaType,
+                    pointJson: payload.encryptedPointJSON,
+                    token: token,
                     clientUid: CaptchaClientIdentifier.shared.value
                 )
+                CaptchaLogger.info(
+                    "check business response code=\(response.repCode) message=\(response.repMsg ?? "nil")"
+                )
+                guard response.repCode == "0000" else {
+                    throw CaptchaClientError.serverMessage(
+                        response.repMsg ?? configuration.localization.formatted(.unknownServerError, response.repCode)
+                    )
+                }
+
                 phase = .success
                 CaptchaLogger.info("phase changed to success")
 
@@ -151,7 +168,7 @@ final class CaptchaViewModel: ObservableObject {
                 CaptchaLogger.info("success callback start")
                 onSuccess(
                     CaptchaResult(
-                        captchaVerification: verification,
+                        captchaVerification: payload.captchaVerification,
                         token: token
                     )
                 )
@@ -160,6 +177,44 @@ final class CaptchaViewModel: ObservableObject {
                 phase = .failure(errorMessage(error), autoRefreshes: true)
             }
         }
+    }
+
+    /// 生成提交给服务端的校验参数。
+    ///
+    /// - Parameters:
+    ///   - displayedOffset: 当前屏幕显示宽度下的滑块偏移。
+    ///   - displayedImageWidth: 背景图当前显示宽度。
+    /// - Returns: 加密或明文坐标 JSON 与业务服务端需要的二次验证参数。
+    /// - Throws: JSON 序列化或 AES 加密失败时抛出错误。
+    private func makeCheckPayload(
+        displayedOffset: Double,
+        displayedImageWidth: Double
+    ) throws -> (
+        encryptedPointJSON: String,
+        captchaVerification: String
+    ) {
+        // HTML 示例使用 620 作为滑动坐标换算基准，不能按底图原始宽度直接换算。
+        let scale = displayedImageWidth > 0 ? 620 / displayedImageWidth : 1
+        let point = CaptchaPoint(x: displayedOffset * scale)
+        CaptchaLogger.info(
+            "check request prepare displayedOffset=\(displayedOffset) displayedWidth=\(displayedImageWidth) scaledX=\(point.x) encrypted=\(!secretKey.isEmpty)"
+        )
+
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = [.sortedKeys]
+        let pointData = try encoder.encode(point)
+        guard let pointJSON = String(data: pointData, encoding: .utf8) else {
+            throw CaptchaClientError.invalidResponse
+        }
+
+        let encryptedPointJSON = secretKey.isEmpty
+            ? pointJSON
+            : try CaptchaAES.encrypt(pointJSON, key: secretKey)
+        let verificationPlain = "\(token)---\(pointJSON)"
+        let captchaVerification = secretKey.isEmpty
+            ? verificationPlain
+            : try CaptchaAES.encrypt(verificationPlain, key: secretKey)
+        return (encryptedPointJSON, captchaVerification)
     }
 
     /// 将内部错误转换为当前语言下的 UI 文案。

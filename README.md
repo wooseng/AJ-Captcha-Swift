@@ -13,7 +13,8 @@
 
 - 支持 SPM 与 CocoaPods 接入
 - SwiftUI 全屏弹窗：半透明黑色背景、居中白色容器
-- 外部配置服务地址与滑动条提示；提示默认为“向右滑动完成验证”
+- 外部配置服务地址、接口地址与滑动条提示；提示默认为“向右滑动完成验证”
+- 支持通过 `CaptchaService` 替换内置网络请求实现，适配自定义网络栈与部署响应格式
 - 组件内部完成 `/captcha/get`、坐标换算、AES-128-ECB 加密、`/captcha/check`
 - 仅在 `/captcha/check` 返回 `repCode == "0000"` 后回调二次验证参数
 - 组件日志仅在 DEBUG 编译时输出，统一携带 `[AJ-Captcha]` 前缀
@@ -108,6 +109,59 @@ struct LoginView: View {
 }
 ```
 
+## 自定义网络请求实现
+
+如果自行部署的网络栈、鉴权、网关或响应包装不同，可以实现 `CaptchaService` 并传入 `CaptchaConfiguration.service`。外部实现只负责发起两个请求并转换结果；坐标换算、AES 加密、二次验证参数生成和最终业务码判断仍在组件内部完成。
+
+```swift
+struct CustomCaptchaService: CaptchaService {
+    func getCaptcha(
+        captchaType: CaptchaType,
+        clientUid: String
+    ) async throws -> CaptchaData {
+        // 使用业务方自己的网络栈请求验证码。
+        let response = try await customClient.getCaptcha(
+            captchaType: captchaType.rawValue,
+            clientUid: clientUid
+        )
+
+        return CaptchaData(
+            originalImageBase64: response.original,
+            jigsawImageBase64: response.jigsaw,
+            token: response.token,
+            secretKey: response.secretKey
+        )
+    }
+
+    func check(
+        captchaType: CaptchaType,
+        pointJson: String,
+        token: String,
+        clientUid: String
+    ) async throws -> CaptchaCheckResponse {
+        // `pointJson` 已由组件完成坐标换算和 AES 加密。
+        let response = try await customClient.check(
+            captchaType: captchaType.rawValue,
+            pointJson: pointJson,
+            token: token,
+            clientUid: clientUid
+        )
+
+        return CaptchaCheckResponse(
+            repCode: response.code,
+            repMsg: response.message
+        )
+    }
+}
+
+let configuration = CaptchaConfiguration(
+    serverURL: URL(string: "https://example.com")!,
+    service: CustomCaptchaService()
+)
+```
+
+不传入 `service` 时，组件使用内置 URLSession 实现，并按 `serverURL + getCaptchaEndpoint/checkCaptchaEndpoint` 发起 POST JSON 请求。
+
 ## UIKit 调用
 
 UIKit 页面可以直接从当前 `UIViewController` 弹出验证码：
@@ -137,7 +191,10 @@ pod 'AJCaptcha', :git => 'https://github.com/wooseng/AJ-Captcha-Swift.git'
 
 | 参数 | 类型 | 说明 |
 | --- | --- | --- |
-| `serverURL` | `URL` | AJ-Captcha 服务根地址；组件自动拼接 `/captcha/get` 与 `/captcha/check` |
+| `serverURL` | `URL` | AJ-Captcha 服务根地址；使用内置请求实现时生效 |
+| `service` | `CaptchaService?` | 外部自定义请求实现；默认 nil 使用内置 URLSession 实现 |
+| `getCaptchaEndpoint` | `String` | 获取验证码图片接口地址，默认 `/captcha/get` |
+| `checkCaptchaEndpoint` | `String` | 校验验证码接口地址，默认 `/captcha/check` |
 | `captchaType` | `CaptchaType` | 验证码类型，当前支持 `.blockPuzzle`，默认 `.blockPuzzle` |
 | `accidentalTouchThreshold` | `Double` | 误触阈值比例，范围 0...1；松手位移低于最大可滑动距离乘以该值时不校验并回弹，默认 `0.05` |
 | `sliderPrompt` | `String` | 滑动条内提示，默认“向右滑动完成验证” |
@@ -153,9 +210,9 @@ pod 'AJCaptcha', :git => 'https://github.com/wooseng/AJ-Captcha-Swift.git'
 
 实现参考 AJ-Captcha 仓库 `view/html` 示例：
 
-1. POST `serverURL + /captcha/get`
+1. POST `serverURL + getCaptchaEndpoint`
 2. 解析背景图、拼图、`token`、`secretKey`
 3. 用户松手后把屏幕偏移换算为原图坐标，并生成 `{"x":xx,"y":5}`
 4. `secretKey` 非空时使用 AES-128-ECB/PKCS7 加密 `pointJson`
-5. POST `serverURL + /captcha/check`
+5. POST `serverURL + checkCaptchaEndpoint`
 6. `repCode == "0000"` 时回调 `captchaVerification`；业务服务端可使用该值完成二次校验

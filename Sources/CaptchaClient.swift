@@ -2,8 +2,9 @@ import Foundation
 
 /// AJ-Captcha 服务端请求客户端。
 ///
-/// 使用方式：`CaptchaViewModel` 内部创建并调用；请求实现保持与 `view/html/js/verify.js`
-/// 的 `getPictrue`、`checkPictrue` 一致，均为 POST JSON。
+/// 使用方式：组件默认在 `CaptchaViewModel` 中创建；外部也可通过 `CaptchaService`
+/// 协议替换整个请求实现。内置客户端保持与 `view/html/js/verify.js` 的
+/// `getPictrue`、`checkPictrue` 一致，均为 POST JSON。
 final class CaptchaClient {
 
     /// 当前组件配置，包含服务根地址。
@@ -27,75 +28,57 @@ final class CaptchaClient {
 
     /// 获取滑动拼图验证码。
     ///
-    /// - Parameter clientUid: 客户端组件唯一标识，需要与后续 check 请求保持一致。
+    /// - Parameters:
+    ///   - captchaType: 验证码类型。
+    ///   - clientUid: 客户端组件唯一标识，需要与后续 check 请求保持一致。
     /// - Returns: 背景图、拼图、token 与 AES 密钥。
     /// - Throws: URL 非法、网络失败、HTTP 非 2xx 或服务端返回非 `0000` 时抛出错误。
-    func getCaptcha(clientUid: String) async throws -> CaptchaData {
-        let body = CaptchaGetRequest(captchaType: configuration.captchaType, clientUid: clientUid, ts: currentTimestamp)
+    func getCaptcha(
+        captchaType: CaptchaType,
+        clientUid: String
+    ) async throws -> CaptchaData {
+        let body = CaptchaGetRequest(captchaType: captchaType, clientUid: clientUid, ts: currentTimestamp)
         let response: CaptchaAPIResponse<CaptchaData> = try await post(
-            path: "/captcha/get",
+            path: configuration.getCaptchaEndpoint,
             body: body
         )
         return try validatedData(from: response)
     }
 
-    /// 校验滑动结果并生成二次验证参数。
+    /// 提交校验请求。
     ///
     /// - Parameters:
+    ///   - captchaType: 验证码类型。
+    ///   - pointJson: 组件加密或明文序列化后的滑动坐标。
     ///   - token: `/captcha/get` 返回的验证码令牌。
-    ///   - secretKey: 服务端下发的 AES 密钥；为空时按协议提交明文坐标。
-    ///   - displayedOffset: 当前屏幕显示宽度下的滑块偏移。
-    ///   - displayedImageWidth: 背景图当前显示宽度，组件按 HTML 协议使用 620 除以该值换算坐标。
     ///   - clientUid: 客户端组件唯一标识，需要与 get 请求保持一致。
-    /// - Returns: check 成功后的二次验证参数。
-    /// - Throws: 加密、网络、HTTP 或服务端校验失败时抛出错误。
+    /// - Returns: 服务端业务码与提示信息。
+    /// - Throws: URL 非法、网络失败、HTTP 非 2xx 或响应格式错误时抛出错误。
     func check(
+        captchaType: CaptchaType,
+        pointJson: String,
         token: String,
-        secretKey: String,
-        displayedOffset: Double,
-        displayedImageWidth: Double,
         clientUid: String
-    ) async throws -> String {
-        // HTML 示例使用 620 作为滑动坐标换算基准，不能按底图原始宽度直接换算。
-        let scale = displayedImageWidth > 0 ? 620 / displayedImageWidth : 1
-        let point = CaptchaPoint(x: displayedOffset * scale)
-        CaptchaLogger.info(
-            "check request prepare displayedOffset=\(displayedOffset) displayedWidth=\(displayedImageWidth) scaledX=\(point.x) encrypted=\(!secretKey.isEmpty)"
-        )
-        let encoder = JSONEncoder()
-        encoder.outputFormatting = [.sortedKeys]
-        let pointData = try encoder.encode(point)
-        guard let pointJSON = String(data: pointData, encoding: .utf8) else {
-            throw CaptchaClientError.invalidResponse
-        }
-
-        let encryptedPoint = secretKey.isEmpty
-            ? pointJSON
-            : try CaptchaAES.encrypt(pointJSON, key: secretKey)
-        let verificationPlain = "\(token)---\(pointJSON)"
-        let captchaVerification = secretKey.isEmpty
-            ? verificationPlain
-            : try CaptchaAES.encrypt(verificationPlain, key: secretKey)
+    ) async throws -> CaptchaCheckResponse {
         let body = CaptchaCheckRequest(
-            captchaType: configuration.captchaType,
-            pointJson: encryptedPoint,
+            captchaType: captchaType,
+            pointJson: pointJson,
             token: token,
             clientUid: clientUid,
             ts: currentTimestamp
         )
 
         let response: CaptchaAPIResponse<CaptchaEmptyData> = try await post(
-            path: "/captcha/check",
+            path: configuration.checkCaptchaEndpoint,
             body: body
         )
-        _ = try validatedCode(from: response)
-        return captchaVerification
+        return try validatedCode(from: response)
     }
 
     /// 拼接服务路径并发送 JSON POST 请求。
     ///
     /// - Parameters:
-    ///   - path: 以 `/` 开头的接口路径，例如 `/captcha/get`。
+    ///   - path: 以 `/` 开头的接口路径，来自 `CaptchaConfiguration` 中的接口地址配置。
     ///   - body: 符合 AJ-Captcha 协议的请求体。
     /// - Returns: 解码后的服务端响应。
     /// - Throws: URL 非法、网络失败、HTTP 非 2xx 或响应格式错误时抛出错误。
@@ -163,13 +146,14 @@ final class CaptchaClient {
     /// - Throws: 服务端返回失败或缺少数据时抛出错误。
     private func validatedCode(
         from response: CaptchaAPIResponse<CaptchaEmptyData>
-    ) throws {
+    ) throws -> CaptchaCheckResponse {
         CaptchaLogger.info("check business response code=\(response.repCode) message=\(response.repMsg ?? "nil")")
         guard response.repCode == "0000" else {
             throw CaptchaClientError.serverMessage(
                 response.repMsg ?? configuration.localization.formatted(.unknownServerError, response.repCode)
             )
         }
+        return CaptchaCheckResponse(repCode: response.repCode, repMsg: response.repMsg)
     }
 
     /// 校验 get 接口响应并返回业务数据。
@@ -198,4 +182,8 @@ final class CaptchaClient {
     private var currentTimestamp: Int64 {
         Int64(Date().timeIntervalSince1970 * 1000)
     }
+}
+
+/// 内置 URLSession 客户端同时作为默认 `CaptchaService` 实现。
+extension CaptchaClient: CaptchaService {
 }
