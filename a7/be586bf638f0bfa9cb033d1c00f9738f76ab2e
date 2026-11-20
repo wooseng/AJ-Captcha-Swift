@@ -1,0 +1,19 @@
+README.md
+  s_97d0624c060d6c::t_b5f82d66fc7cc8 205-215
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "a7be586bf638f0bfa9cb033d1c00f9738f76ab2e",
+  "prompts": {},
+  "sessions": {
+    "s_97d0624c060d6c": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1f6e9-f0c5-70c2-bc65-d55c9f461200",
+        "model": "glm-5.3-flash"
+      },
+      "human_author": "残无殇 <zhanbaocheng@vip.qq.com>"
+    }
+  }
+}
