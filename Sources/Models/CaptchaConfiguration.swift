@@ -15,6 +15,9 @@ public struct CaptchaConfiguration {
     /// AJ-Captcha 服务根地址，例如 `https://example.com/captcha-api`。
     public let serverURL: URL
 
+    /// 外部配置的客户端唯一标识；为 nil 时使用组件生成并持久化的 UUID。
+    public let clientUID: String?
+
     /// 外部自定义请求实现；为 nil 时使用内置 URLSession 实现。
     public let service: CaptchaService?
 
@@ -43,6 +46,7 @@ public struct CaptchaConfiguration {
     ///
     /// - Parameters:
     ///   - serverURL: AJ-Captcha 服务根地址；使用内置请求实现时生效。
+    ///   - clientUID: 外部配置的客户端唯一标识；默认 nil 表示自动生成并持久化。空字符串会回退到自动生成。
     ///   - service: 外部自定义请求实现；默认 nil 表示使用内置 URLSession 实现。
     ///   - getCaptchaEndpoint: 获取验证码图片接口地址，默认 `/captcha/get`；使用内置请求实现时生效。
     ///   - checkCaptchaEndpoint: 校验验证码接口地址，默认 `/captcha/check`。
@@ -52,6 +56,7 @@ public struct CaptchaConfiguration {
     ///   - localization: 组件国际化文案配置；默认先读取宿主 `Localizable.strings`，缺失项回退简体中文。
     public init(
         serverURL: URL,
+        clientUID: String? = nil,
         service: CaptchaService? = nil,
         getCaptchaEndpoint: String = "/captcha/get",
         checkCaptchaEndpoint: String = "/captcha/check",
@@ -61,6 +66,7 @@ public struct CaptchaConfiguration {
         localization: CaptchaLocalization = CaptchaLocalization()
     ) {
         self.serverURL = serverURL
+        self.clientUID = clientUID.flatMap { $0.isEmpty ? nil : $0 }
         self.service = service
         self.getCaptchaEndpoint = getCaptchaEndpoint
         self.checkCaptchaEndpoint = checkCaptchaEndpoint

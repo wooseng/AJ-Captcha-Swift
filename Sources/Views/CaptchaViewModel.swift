@@ -26,6 +26,9 @@ final class CaptchaViewModel: ObservableObject {
     /// 验证码请求实现；优先使用外部注入实现，否则使用内置 URLSession 客户端。
     private let service: CaptchaService
 
+    /// get 与 check 请求统一使用的客户端唯一标识。
+    private let clientUID: String
+
     /// 组件配置。
     private let configuration: CaptchaConfiguration
 
@@ -38,6 +41,7 @@ final class CaptchaViewModel: ObservableObject {
     init(configuration: CaptchaConfiguration) {
         self.configuration = configuration
         self.service = configuration.service ?? CaptchaClient(configuration: configuration)
+        self.clientUID = configuration.clientUID ?? CaptchaClientIdentifier.shared.value
     }
 
     /// 滑动提示文案；外部覆盖文案优先，其次读取国际化配置。
@@ -82,7 +86,7 @@ final class CaptchaViewModel: ObservableObject {
             do {
                 let data = try await service.getCaptcha(
                     captchaType: configuration.captchaType,
-                    clientUid: CaptchaClientIdentifier.shared.value
+                    clientUid: clientUID
                 )
                 guard phase == .loading else {
                     CaptchaLogger.info("load result ignored because phase changed")
@@ -146,7 +150,7 @@ final class CaptchaViewModel: ObservableObject {
                     captchaType: configuration.captchaType,
                     pointJson: payload.encryptedPointJSON,
                     token: token,
-                    clientUid: CaptchaClientIdentifier.shared.value
+                    clientUid: clientUID
                 )
                 CaptchaLogger.info(
                     "check business response code=\(response.repCode) message=\(response.repMsg ?? "nil")"

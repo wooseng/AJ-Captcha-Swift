@@ -156,6 +156,7 @@ struct CustomCaptchaService: CaptchaService {
 
 let configuration = CaptchaConfiguration(
     serverURL: URL(string: "https://example.com")!,
+    clientUID: "device-or-business-uid",
     service: CustomCaptchaService()
 )
 ```
@@ -192,6 +193,7 @@ pod 'AJCaptcha', :git => 'https://github.com/wooseng/AJ-Captcha-Swift.git'
 | 参数 | 类型 | 说明 |
 | --- | --- | --- |
 | `serverURL` | `URL` | AJ-Captcha 服务根地址；使用内置请求实现时生效 |
+| `clientUID` | `String?` | 外部配置的客户端唯一标识；默认 nil 自动生成并持久化，空字符串回退自动生成 |
 | `service` | `CaptchaService?` | 外部自定义请求实现；默认 nil 使用内置 URLSession 实现 |
 | `getCaptchaEndpoint` | `String` | 获取验证码图片接口地址，默认 `/captcha/get` |
 | `checkCaptchaEndpoint` | `String` | 校验验证码接口地址，默认 `/captcha/check` |
