@@ -4,7 +4,7 @@ import Foundation
 struct CaptchaCheckRequest: Encodable {
 
     /// 验证码类型；当前 Swift 组件实现 HTML 示例中的滑动拼图。
-    let captchaType = "blockPuzzle"
+    let captchaType: CaptchaType
 
     /// 按 AJ-Captcha 协议加密或明文序列化后的滑动坐标。
     let pointJson: String

@@ -137,6 +137,8 @@ pod 'AJCaptcha', :git => 'https://github.com/wooseng/AJ-Captcha-Swift.git'
 | 参数 | 类型 | 说明 |
 | --- | --- | --- |
 | `serverURL` | `URL` | AJ-Captcha 服务根地址；组件自动拼接 `/captcha/get` 与 `/captcha/check` |
+| `captchaType` | `CaptchaType` | 验证码类型，当前支持 `.blockPuzzle`，默认 `.blockPuzzle` |
+| `accidentalTouchThreshold` | `Double` | 误触阈值比例，范围 0...1；松手位移低于最大可滑动距离乘以该值时不校验并回弹，默认 `0.05` |
 | `sliderPrompt` | `String` | 滑动条内提示，默认“向右滑动完成验证” |
 | `onSuccess` | `(CaptchaResult) -> Void` | `/captcha/check` 成功后的回调，只回调一次 |
 | `result.captchaVerification` | `String` | 业务服务端需要的二次验证参数 |

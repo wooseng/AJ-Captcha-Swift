@@ -50,6 +50,11 @@ final class CaptchaViewModel: ObservableObject {
         configuration.localization
     }
 
+    /// 当前组件误触阈值比例。
+    var accidentalTouchThreshold: Double {
+        configuration.accidentalTouchThreshold
+    }
+
     /// 读取组件固定文案。
     ///
     /// - Parameter key: 组件国际化 key。

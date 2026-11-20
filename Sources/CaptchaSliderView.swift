@@ -20,6 +20,9 @@ struct CaptchaSliderView: View {
     /// 组件国际化配置。
     private let localization: CaptchaLocalization
 
+    /// 误触阈值比例；松手位移低于最大可滑动距离乘以该值时直接回弹。
+    private let accidentalTouchThreshold: Double
+
     /// 提交滑动校验的回调。
     private let onCheck: (_ displayedOffset: Double, _ displayedImageWidth: Double) -> Void
 
@@ -40,6 +43,7 @@ struct CaptchaSliderView: View {
     ///   - phase: 当前验证阶段。
     ///   - sliderPrompt: 滑动条提示文案。
     ///   - localization: 组件国际化配置。
+    ///   - accidentalTouchThreshold: 误触阈值比例，范围 0...1。
     ///   - onCheck: 松手后的提交回调，参数依次为屏幕偏移和背景图显示宽度。
     ///   - onRefresh: 点击刷新后的回调。
     init(
@@ -48,6 +52,7 @@ struct CaptchaSliderView: View {
         phase: CaptchaPhase,
         sliderPrompt: String,
         localization: CaptchaLocalization,
+        accidentalTouchThreshold: Double,
         onCheck: @escaping (_ displayedOffset: Double, _ displayedImageWidth: Double) -> Void,
         onRefresh: @escaping () -> Void
     ) {
@@ -56,6 +61,7 @@ struct CaptchaSliderView: View {
         self.phase = phase
         self.sliderPrompt = sliderPrompt
         self.localization = localization
+        self.accidentalTouchThreshold = accidentalTouchThreshold
         self.onCheck = onCheck
         self.onRefresh = onRefresh
     }
@@ -207,6 +213,18 @@ struct CaptchaSliderView: View {
                     }
                     .onEnded { _ in
                         guard isEnabled else { return }
+
+                        let thresholdOffset = maximumOffset * CGFloat(accidentalTouchThreshold)
+                        if offset < thresholdOffset {
+                            CaptchaLogger.info(
+                                "check ignored by accidental threshold offset=\(offset) threshold=\(thresholdOffset)"
+                            )
+                            withAnimation(.easeOut(duration: 0.2)) {
+                                offset = 0
+                            }
+                            return
+                        }
+
                         onCheck(offset, imageWidth)
                     }
             )

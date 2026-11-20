@@ -93,6 +93,7 @@ struct CaptchaPopupView: View {
                         phase: viewModel.phase,
                         sliderPrompt: viewModel.sliderPrompt,
                         localization: viewModel.localization,
+                        accidentalTouchThreshold: viewModel.accidentalTouchThreshold,
                         onCheck: { displayedOffset, displayedWidth in
                             viewModel.check(
                                 displayedOffset: displayedOffset,

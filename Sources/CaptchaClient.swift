@@ -31,7 +31,7 @@ final class CaptchaClient {
     /// - Returns: 背景图、拼图、token 与 AES 密钥。
     /// - Throws: URL 非法、网络失败、HTTP 非 2xx 或服务端返回非 `0000` 时抛出错误。
     func getCaptcha(clientUid: String) async throws -> CaptchaData {
-        let body = CaptchaGetRequest(clientUid: clientUid, ts: currentTimestamp)
+        let body = CaptchaGetRequest(captchaType: configuration.captchaType, clientUid: clientUid, ts: currentTimestamp)
         let response: CaptchaAPIResponse<CaptchaData> = try await post(
             path: "/captcha/get",
             body: body
@@ -77,6 +77,7 @@ final class CaptchaClient {
             ? verificationPlain
             : try CaptchaAES.encrypt(verificationPlain, key: secretKey)
         let body = CaptchaCheckRequest(
+            captchaType: configuration.captchaType,
             pointJson: encryptedPoint,
             token: token,
             clientUid: clientUid,
