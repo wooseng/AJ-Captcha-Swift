@@ -1,0 +1,23 @@
+README.md
+  s_97d0624c060d6c::t_90cf1bd9462885 110-126
+Sources/CaptchaUIKitPopupView.swift
+  s_97d0624c060d6c::t_90cf1bd9462885 1-54
+Sources/UIViewController+CaptchaPopup.swift
+  s_97d0624c060d6c::t_90cf1bd9462885 1-41
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "620b10eda57dfec69308ce637aa6e94ab2f40b08",
+  "prompts": {},
+  "sessions": {
+    "s_97d0624c060d6c": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1f6e9-f0c5-70c2-bc65-d55c9f461200",
+        "model": "glm-5.3"
+      },
+      "human_author": "残无殇 <zhanbaocheng@vip.qq.com>"
+    }
+  }
+}
