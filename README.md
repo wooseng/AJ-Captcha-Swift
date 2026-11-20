@@ -202,6 +202,17 @@ pod 'AJCaptcha', :git => 'https://github.com/wooseng/AJ-Captcha-Swift.git'
 | `result.captchaVerification` | `String` | 业务服务端需要的二次验证参数 |
 | `result.token` | `String` | 本次验证码令牌，便于日志排查 |
 
+## 源码结构
+
+```text
+Sources/
+├── Extensions/   # SwiftUI、UIKit 调用扩展
+├── Models/       # 配置、请求、响应与结果模型
+├── Network/      # 内置请求客户端、自定义请求协议与网络错误
+├── Utilities/    # AES、图片解码、国际化、日志等工具
+└── Views/        # SwiftUI 弹窗、滑块视图与状态机
+```
+
 ## Demo
 
 根目录 `DemoApp.swift` 是 Demo App 源码，默认传入本地服务地址 `http://localhost:8080`。`AJCaptchaDemo.xcodeproj` 通过 Xcode 的 Local Package 配置引用根目录 SPM 包，并依赖 `AJCaptcha` 产品；组件的 `Package.swift` 只描述库本身，不包含 Demo 目标。用 Xcode 打开 `AJCaptchaDemo.xcodeproj`，选择真机或通用 iOS 设备运行。
