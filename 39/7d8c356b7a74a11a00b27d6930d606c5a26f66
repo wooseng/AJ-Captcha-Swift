@@ -1,0 +1,116 @@
+Sources/CaptchaLocalizationKey.swift
+  s_97d0624c060d6c::t_90bef6c35c3fda 3
+  s_97d0624c060d6c::t_e8dfaf0788bd9f 23-25
+  s_97d0624c060d6c::t_9341d436aa64b9 1-2,4-22,26-52
+KeyboardDismissHandler.swift
+  s_97d0624c060d6c::t_ebf9fc8165540f 1-68
+DemoApp.swift
+  s_97d0624c060d6c::t_01df1d62fbc521 2-3,11-12,15,17-21,23-24,26-111,121-135
+  s_97d0624c060d6c::t_ebf9fc8165540f 112-113
+  s_97d0624c060d6c::t_f07a8724de004a 115-120
+  s_97d0624c060d6c::t_02966f136734ba 13
+  s_97d0624c060d6c::t_44d9b70bd613ef 114
+  s_97d0624c060d6c::t_0ab6fe7452ea58 25
+  s_97d0624c060d6c::t_dc284b3800bc70 1,14,16
+  s_97d0624c060d6c::t_b647cafb23c695 4-10,22
+Sources/CaptchaViewModel.swift
+  s_97d0624c060d6c::t_cac93be76d14ce 12
+  s_97d0624c060d6c::t_5898fde09daa59 1-11,13-56,58-64,70-76,82-86,92,94,98-100,106-121,127-138,140,145,147-153,155-170
+  s_97d0624c060d6c::t_9341d436aa64b9 57
+  s_97d0624c060d6c::t_dcdc661ed93107 65-69,77-81,87-91,93,95-97,101-105,122-126,139,141-144,146,154
+Sources/CaptchaAES.swift
+  s_97d0624c060d6c::t_5898fde09daa59 1-50
+Sources/CaptchaImageDecoder.swift
+  s_97d0624c060d6c::t_5898fde09daa59 1-17
+Sources/CaptchaConfiguration.swift
+  s_97d0624c060d6c::t_5898fde09daa59 1-38
+Sources/CaptchaData.swift
+  s_97d0624c060d6c::t_5898fde09daa59 1-17
+Sources/CaptchaPoint.swift
+  s_97d0624c060d6c::t_5898fde09daa59 1-21
+Sources/CaptchaCheckRequest.swift
+  s_97d0624c060d6c::t_5898fde09daa59 1-20
+AJCaptcha.podspec
+  s_97d0624c060d6c::t_dc284b3800bc70 1-18
+Sources/CaptchaClient.swift
+  s_97d0624c060d6c::t_dcdc661ed93107 62-64,106,112,119,121,126-128,130,166,178-180,187,190-192
+  s_97d0624c060d6c::t_5898fde09daa59 1-61,65-105,107-111,113-118,120,122-125,129,131-165,167-177,181-186,188-189,193-200
+Sources/CaptchaResult.swift
+  s_97d0624c060d6c::t_5898fde09daa59 1-24
+README.md
+  s_97d0624c060d6c::t_e8dfaf0788bd9f 59
+  s_97d0624c060d6c::t_489f7f068bd185 2-15,17-20,70-86,88-112,114-121,123-129,131-141
+  s_97d0624c060d6c::t_0ab6fe7452ea58 21-22,24-40,51-58,60-69
+  s_97d0624c060d6c::t_dc284b3800bc70 87,113
+  s_97d0624c060d6c::t_0703c3933dda87 23,41-50
+  s_97d0624c060d6c::t_b647cafb23c695 16,122
+  s_97d0624c060d6c::t_02966f136734ba 130
+Sources/CaptchaLogger.swift
+  s_97d0624c060d6c::t_dcdc661ed93107 1-29
+AJCaptchaDemo.xcodeproj/project.pbxproj
+  s_97d0624c060d6c::t_a1446bf7fcebd0 6,10,28,154,158-161,238,242-245
+  s_97d0624c060d6c::t_dc284b3800bc70 1-5,7-9,11,13-16,18-27,29-57,59-138,140-153,155-157,162-237,239-241,246-347
+  s_97d0624c060d6c::t_abcb4555ef6517 12,17,58,139
+Sources/CaptchaLocalization.swift
+  s_97d0624c060d6c::t_5898fde09daa59 1-20,22-31,33-43,45-63,65-74,76-87,90-110
+  s_97d0624c060d6c::t_e8dfaf0788bd9f 88-89
+  s_97d0624c060d6c::t_9341d436aa64b9 21,32,44,64,75
+Sources/View.swift
+  s_97d0624c060d6c::t_5898fde09daa59 1-30,39-41
+  s_97d0624c060d6c::t_86068f2932f1c0 31-38
+DemoInfo.plist
+  s_97d0624c060d6c::t_dcdc661ed93107 23-27
+  s_97d0624c060d6c::t_71054d671a96c0 1-22,28-43,47-49
+  s_97d0624c060d6c::t_57070e7e58cbf8 44-46
+Sources/CaptchaPhase.swift
+  s_97d0624c060d6c::t_9341d436aa64b9 1-5,9-22
+  s_97d0624c060d6c::t_90bef6c35c3fda 23
+  s_97d0624c060d6c::t_cac93be76d14ce 6-8
+.gitignore
+  h_51aaa67b256e52 63
+Package.swift
+  s_97d0624c060d6c::t_dc284b3800bc70 3,5,8,13,19-20,25-26
+  s_97d0624c060d6c::t_71054d671a96c0 6
+  s_97d0624c060d6c::t_da554cc8a40635 1-2,4,7,9-12,14-18,21-24,27-29
+Sources/CaptchaClientIdentifier.swift
+  s_97d0624c060d6c::t_5898fde09daa59 1-26
+Sources/CaptchaEmptyData.swift
+  s_97d0624c060d6c::t_5898fde09daa59 1-7
+Sources/CaptchaGetRequest.swift
+  s_97d0624c060d6c::t_5898fde09daa59 1-14
+Sources/CaptchaClientError.swift
+  s_97d0624c060d6c::t_5898fde09daa59 1-58
+Sources/CaptchaAPIResponse.swift
+  s_97d0624c060d6c::t_5898fde09daa59 1-14
+Sources/CaptchaPopupView.swift
+  s_97d0624c060d6c::t_5898fde09daa59 1-54,57-60,69,74-83,85-86,88-192,194-196
+  s_97d0624c060d6c::t_dcdc661ed93107 55,193
+  s_97d0624c060d6c::t_cac93be76d14ce 56,84
+  s_97d0624c060d6c::t_e8dfaf0788bd9f 61-68,70-73,87
+Sources/CaptchaSliderView.swift
+  s_97d0624c060d6c::t_681aa175752fa5 6
+  s_97d0624c060d6c::t_5898fde09daa59 1-5,7-14,16-47,49-133,136-271
+  s_97d0624c060d6c::t_e8dfaf0788bd9f 134-135
+  s_97d0624c060d6c::t_9341d436aa64b9 15,48
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "397d8c356b7a74a11a00b27d6930d606c5a26f66",
+  "prompts": {},
+  "humans": {
+    "h_51aaa67b256e52": {
+      "author": "wooseng <zhanbaocheng@jtexpress.com>"
+    }
+  },
+  "sessions": {
+    "s_97d0624c060d6c": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1f6e9-f0c5-70c2-bc65-d55c9f461200",
+        "model": "glm-5.3"
+      },
+      "human_author": "wooseng <zhanbaocheng@jtexpress.com>"
+    }
+  }
+}
