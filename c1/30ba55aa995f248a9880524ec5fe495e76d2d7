@@ -1,0 +1,35 @@
+Sources/CaptchaClient.swift
+  s_97d0624c060d6c::t_9cfef30c4dfbd3 34,80
+README.md
+  s_97d0624c060d6c::t_9cfef30c4dfbd3 140-141
+Sources/CaptchaConfiguration.swift
+  s_97d0624c060d6c::t_9cfef30c4dfbd3 17-25,36-37,42-43,48-49
+Sources/CaptchaType.swift
+  s_97d0624c060d6c::t_9cfef30c4dfbd3 1-10
+Sources/CaptchaSliderView.swift
+  s_97d0624c060d6c::t_9cfef30c4dfbd3 23-25,46,55,64,216-227
+Sources/CaptchaViewModel.swift
+  s_97d0624c060d6c::t_9cfef30c4dfbd3 53-57
+Sources/CaptchaPopupView.swift
+  s_97d0624c060d6c::t_9cfef30c4dfbd3 96
+Sources/CaptchaCheckRequest.swift
+  s_97d0624c060d6c::t_9cfef30c4dfbd3 7
+Sources/CaptchaGetRequest.swift
+  s_97d0624c060d6c::t_9cfef30c4dfbd3 7
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "c130ba55aa995f248a9880524ec5fe495e76d2d7",
+  "prompts": {},
+  "sessions": {
+    "s_97d0624c060d6c": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1f6e9-f0c5-70c2-bc65-d55c9f461200",
+        "model": "glm-5.3"
+      },
+      "human_author": "残无殇 <zhanbaocheng@vip.qq.com>"
+    }
+  }
+}
